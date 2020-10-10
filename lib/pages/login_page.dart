@@ -1,6 +1,9 @@
+import 'package:chat/helpers/mostrar_alerta.dart';
+import 'package:chat/services/auth_service.dart';
 import 'package:chat/widgets/custom_button.dart';
 import 'package:chat/widgets/custom_input.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -13,6 +16,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey[200],
@@ -29,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Container(
-          height: MediaQuery.of(context).size.height  * 0.9,
+          height: MediaQuery.of(context).size.height * 0.9,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -61,10 +66,23 @@ class _LoginPageState extends State<LoginPage> {
                 padding: EdgeInsets.symmetric(horizontal: 40),
                 child: CustomButton(
                   text: 'Iniciar Sesión',
-                  onPressed: () {
-                    print(this.emailCtrl.text);
-                    print(this.passCtrl.text);
-                  },
+                  onPressed: authService.autenticando
+                      ? null
+                      : () async {
+                          FocusScope.of(context).unfocus();
+
+                          final loginOK = await authService.login(
+                              this.emailCtrl.text.trim(),
+                              this.passCtrl.text.trim());
+
+                          if (loginOK) {
+                            //TODO: Conectar a nuestro socket server
+                            Navigator.pushReplacementNamed(context, 'usuarios');
+                          } else {
+                            mostrarAlerta(context, 'Login incorrecto',
+                                'Revise sus credenciales nuevamente');
+                          }
+                        },
                 ),
               ),
               Row(

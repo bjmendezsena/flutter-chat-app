@@ -22,6 +22,8 @@ class CustomButton extends StatelessWidget {
             right: BorderSide(color: Colors.black87),
           )),
       child: MaterialButton(
+        hoverElevation: 9.0,
+        disabledColor: Colors.black45,
         minWidth: double.infinity,
         height: 60,
         onPressed: this.onPressed,

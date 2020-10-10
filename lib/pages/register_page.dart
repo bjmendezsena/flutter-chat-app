@@ -1,8 +1,16 @@
+import 'package:chat/helpers/mostrar_alerta.dart';
+import 'package:chat/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RegisterPage extends StatelessWidget {
+  final nameCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final passCtrl = TextEditingController();
+  final confirmCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
@@ -17,9 +25,9 @@ class RegisterPage extends StatelessWidget {
             icon: Icon(Icons.arrow_back_ios, size: 20, color: Colors.black)),
       ),
       body: SingleChildScrollView(
-         physics: BouncingScrollPhysics(),
+        physics: BouncingScrollPhysics(),
         child: Container(
-          height: MediaQuery.of(context).size.height -100,
+          height: MediaQuery.of(context).size.height - 100,
           width: double.infinity,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -43,10 +51,16 @@ class RegisterPage extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: 40),
                       child: Column(
                         children: [
-                          makeInput(label: 'Email'),
-                          makeInput(label: 'Contraseña', obscureText: true),
+                          makeInput(label: 'Nombre', controler: nameCtrl),
+                          makeInput(label: 'Email', controler: emailCtrl),
                           makeInput(
-                              label: 'Confirmar contraseña', obscureText: true),
+                              label: 'Contraseña',
+                              obscureText: true,
+                              controler: passCtrl),
+                          makeInput(
+                              label: 'Confirmar contraseña',
+                              obscureText: true,
+                              controler: confirmCtrl),
                         ],
                       ),
                     ),
@@ -64,7 +78,33 @@ class RegisterPage extends StatelessWidget {
                           child: MaterialButton(
                             minWidth: double.infinity,
                             height: 60,
-                            onPressed: () {},
+                            onPressed: authService.autenticando
+                                ? null
+                                : () async {
+                                    if (passCtrl.text == confirmCtrl.text) {
+                                      final registroOk =
+                                          await authService.register(
+                                              nameCtrl.text.trim(),
+                                              emailCtrl.text.trim(),
+                                              passCtrl.text);
+
+                                      if (registroOk == true) {
+                                        //TODO: Conectar a socket server
+                                        Navigator.pushReplacementNamed(
+                                            context, 'usuarios');
+                                      }else{
+                                        mostrarAlerta(
+                                          context,
+                                          'Registro incorrecto incorrecto',
+                                          registroOk);
+                                      }
+                                    } else {
+                                      mostrarAlerta(
+                                          context,
+                                          'Registro incorrecto incorrecto',
+                                          'Las contraseñas deben coincidir');
+                                    }
+                                  },
                             color: Colors.blue,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -98,7 +138,7 @@ class RegisterPage extends StatelessWidget {
   }
 }
 
-Widget makeInput({label, obscureText = false}) {
+Widget makeInput({label, obscureText = false, controler}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -109,6 +149,7 @@ Widget makeInput({label, obscureText = false}) {
               color: Colors.black87)),
       SizedBox(height: 5),
       TextField(
+        controller: controler,
         obscureText: obscureText,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
