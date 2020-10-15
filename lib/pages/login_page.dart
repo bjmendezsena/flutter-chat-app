@@ -1,5 +1,6 @@
 import 'package:chat/helpers/mostrar_alerta.dart';
 import 'package:chat/services/auth_service.dart';
+import 'package:chat/services/socket_service.dart';
 import 'package:chat/widgets/custom_button.dart';
 import 'package:chat/widgets/custom_input.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -76,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                               this.passCtrl.text.trim());
 
                           if (loginOK) {
-                            //TODO: Conectar a nuestro socket server
+                            socketService.connect();
                             Navigator.pushReplacementNamed(context, 'usuarios');
                           } else {
                             mostrarAlerta(context, 'Login incorrecto',
